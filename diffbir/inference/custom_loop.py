@@ -14,7 +14,13 @@ from ..pipeline import (
     SwinIRPipeline,
     Pipeline,
 )
-from ..model import SwinIR, ControlLDM, Diffusion, build_identity_encoder
+from ..model import (
+    SwinIR,
+    ControlLDM,
+    Diffusion,
+    build_identity_encoder,
+    validate_identity_checkpoint_source,
+)
 from ..model.config import AttnMode, Config
 
 
@@ -52,9 +58,15 @@ class CustomInferenceLoop(InferenceLoop):
         self.cldm.load_controlnet_from_ckpt(control_weight)
         print(f"load controlnet weight")
         if self.args.identity_ckpt:
-            identity_weight = torch.load(self.args.identity_ckpt, map_location="cpu")
-            if "state_dict" in identity_weight:
-                identity_weight = identity_weight["state_dict"]
+            identity_checkpoint = torch.load(
+                self.args.identity_ckpt, map_location="cpu"
+            )
+            validate_identity_checkpoint_source(
+                identity_checkpoint, self.args.identity_source
+            )
+            identity_weight = identity_checkpoint.get(
+                "state_dict", identity_checkpoint
+            )
             self.cldm.load_identity_state_dict(identity_weight)
             print(f"load identity attention weight from {self.args.identity_ckpt}")
         self.cldm.eval().to(self.args.device)
@@ -101,6 +113,7 @@ class CustomInferenceLoop(InferenceLoop):
             self.args.device,
             identity_encoder,
             self.args.identity_scale,
+            self.args.identity_source,
         )
 
     def after_load_lq(self, lq: Image.Image) -> np.ndarray:

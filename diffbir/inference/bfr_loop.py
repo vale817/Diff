@@ -39,6 +39,7 @@ class BFRInferenceLoop(InferenceLoop):
             self.args.device,
             identity_encoder,
             self.args.identity_scale,
+            self.args.identity_source,
         )
 
     def after_load_lq(self, lq: Image.Image) -> np.ndarray:

@@ -53,7 +53,13 @@ class Pipeline:
         device: str,
         identity_encoder: nn.Module | None = None,
         identity_scale: float = 0.0,
+        identity_source: str = "stage1",
     ) -> None:
+        if identity_source not in {"stage1", "lq"}:
+            raise ValueError(
+                "identity_source must be either 'stage1' or 'lq', "
+                f"got {identity_source!r}"
+            )
         self.cleaner = cleaner
         self.cldm = cldm
         self.diffusion = diffusion
@@ -61,6 +67,7 @@ class Pipeline:
         self.device = device
         self.identity_encoder = identity_encoder
         self.identity_scale = identity_scale
+        self.identity_source = identity_source
         self.output_size: Tuple[int, int] = None
 
     def set_output_size(self, lq_size: Tuple[int]) -> None:
@@ -287,8 +294,9 @@ class Pipeline:
             )
         identity_embedding = None
         if self.identity_encoder is not None and self.identity_scale != 0:
-            with VRAMPeakMonitor("encoding stage-1 identity"):
-                identity_embedding = self.identity_encoder(cond_img.clamp(0, 1))
+            identity_image = cond_img if self.identity_source == "stage1" else lq_tensor
+            with VRAMPeakMonitor(f"encoding {self.identity_source} identity"):
+                identity_embedding = self.identity_encoder(identity_image.clamp(0, 1))
         assert all(x >= 512 for x in cond_img.shape[2:]), (
             "The resolution of stage-1 model output should be greater than 512, "
             "since it will be used as condition for stage-2 model."

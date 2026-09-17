@@ -17,7 +17,7 @@ from ..utils.common import (
 from .pretrained_models import MODELS
 from ..pipeline import Pipeline
 from ..utils.cond_fn import MSEGuidance, WeightedMSEGuidance
-from ..model import ControlLDM, Diffusion
+from ..model import ControlLDM, Diffusion, validate_identity_checkpoint_source
 from ..model.config import AttnMode, Config
 from ..utils.caption import (
     LLaVACaptioner,
@@ -91,9 +91,15 @@ class InferenceLoop:
         self.cldm.load_controlnet_from_ckpt(control_weight)
         print(f"load controlnet weight")
         if self.args.identity_ckpt:
-            identity_weight = torch.load(self.args.identity_ckpt, map_location="cpu")
-            if "state_dict" in identity_weight:
-                identity_weight = identity_weight["state_dict"]
+            identity_checkpoint = torch.load(
+                self.args.identity_ckpt, map_location="cpu"
+            )
+            validate_identity_checkpoint_source(
+                identity_checkpoint, self.args.identity_source
+            )
+            identity_weight = identity_checkpoint.get(
+                "state_dict", identity_checkpoint
+            )
             self.cldm.load_identity_state_dict(identity_weight)
             print(f"load identity attention weight from {self.args.identity_ckpt}")
         self.cldm.eval().to(self.args.device)

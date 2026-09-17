@@ -169,4 +169,5 @@ train:
   train_steps: 200
   ckpt_every: 100
   identity_scale: 1.0
+  identity_source: stage1
   noise_aug_timestep: 50

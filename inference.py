@@ -102,6 +102,16 @@ def parse_args() -> Namespace:
         default=1.0,
         help="Strength of the decoupled identity attention branch.",
     )
+    parser.add_argument(
+        "--identity_source",
+        type=str,
+        choices=["stage1", "lq"],
+        default="stage1",
+        help=(
+            "Image used by the identity encoder: the SwinIR stage-1 output "
+            "or the LQ tensor fed into SwinIR."
+        ),
+    )
     # sampling parameters
     parser.add_argument(
         "--sampler",

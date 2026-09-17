@@ -40,6 +40,12 @@ def main(args) -> None:
     set_seed(args.seed, device_specific=True)
     device = accelerator.device
     cfg = OmegaConf.load(args.config)
+    identity_source = cfg.train.get("identity_source", "stage1")
+    if identity_source not in {"stage1", "lq"}:
+        raise ValueError(
+            "train.identity_source must be either 'stage1' or 'lq', "
+            f"got {identity_source!r}"
+        )
     required_paths = [
         "sd_path",
         "controlnet_path",
@@ -85,6 +91,7 @@ def main(args) -> None:
     if accelerator.is_main_process:
         count = sum(parameter.numel() for parameter in trainable)
         print(f"Trainable identity parameters: {count:,}")
+        print(f"Identity source: {identity_source}")
     optimizer = torch.optim.AdamW(trainable, lr=cfg.train.learning_rate)
     dataset = instantiate_from_config(cfg.dataset.train)
     loader = DataLoader(
@@ -120,7 +127,8 @@ def main(args) -> None:
             with torch.no_grad(), accelerator.autocast():
                 z_0 = pure_cldm.vae_encode(gt)
                 stage1 = swinir(lq)
-                identity_embedding = identity_encoder(stage1.clamp(0, 1))
+                identity_image = stage1 if identity_source == "stage1" else lq
+                identity_embedding = identity_encoder(identity_image.clamp(0, 1))
                 cond = pure_cldm.prepare_condition(
                     stage1,
                     prompt,

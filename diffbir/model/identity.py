@@ -130,3 +130,24 @@ def build_identity_encoder(model_path: str) -> nn.Module:
     if ext == ".onnx":
         return ONNXRuntimeIdentityEncoder(model_path)
     return TorchScriptIdentityEncoder(model_path)
+
+
+def validate_identity_checkpoint_source(
+    checkpoint: Any,
+    requested_source: str,
+) -> None:
+    """Reject a checkpoint trained with a different identity-image source."""
+    if not isinstance(checkpoint, dict) or "config" not in checkpoint:
+        return
+    config = checkpoint["config"]
+    if not isinstance(config, dict):
+        return
+    train_config = config.get("train", {})
+    if not isinstance(train_config, dict):
+        return
+    trained_source = train_config.get("identity_source", "stage1")
+    if trained_source != requested_source:
+        raise ValueError(
+            "identity checkpoint/source mismatch: checkpoint was trained with "
+            f"{trained_source!r}, but inference requested {requested_source!r}"
+        )
