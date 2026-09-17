@@ -1,0 +1,2 @@
+method,num,psnr_mean,ssim_mean,lpips_mean
+codeformer_w05_test1000,1000,24.10577346539061,0.6350066739823018,0.2168000929877162

@@ -1,0 +1,2 @@
+method,num,psnr_mean,ssim_mean,lpips_mean
+difface_eta05_seed231_test1000,1000,24.149603721477725,0.6402395087808184,0.26785919077694414

@@ -1,0 +1,2 @@
+method,num,psnr_mean,ssim_mean,lpips_mean
+diffbir_v21_seed231_test1000,1000,24.169327790132563,0.651068915756716,0.2618012617155909

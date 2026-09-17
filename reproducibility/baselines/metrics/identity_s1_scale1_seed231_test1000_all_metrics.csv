@@ -1,0 +1,2 @@
+method,num,psnr,ssim,lpips,arcface_cosine,adaface_cosine
+"ID-DiffBIR (scale=1, seed=231)",1000,24.718633455782523,0.6552975595566345,0.2584890050888062,0.719337,0.7368147901296616

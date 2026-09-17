@@ -1,0 +1,2 @@
+method,num,psnr,ssim,lpips,arcface_cosine,adaface_cosine
+"DifFace (eta=0.5, seed=231)",1000,24.149603721477725,0.6402395087808184,0.2678591907769441,0.61769,0.6343734118491411

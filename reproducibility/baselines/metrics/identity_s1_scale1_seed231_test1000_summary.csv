@@ -1,0 +1,2 @@
+method,num,psnr_mean,ssim_mean,lpips_mean
+identity_s1_scale1_seed231_test1000,1000,24.718633455782523,0.6552975595566345,0.2584890050888062
